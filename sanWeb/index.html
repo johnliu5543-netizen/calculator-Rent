@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算力租享 | 校园计算器预约</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --success: #10B981;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --bg-gradient: linear-gradient(135deg, #F0F9FF 0%, #FFFFFF 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        .container { width: 92%; max-width: 480px; margin-top: 50px; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 28px;
+            border-radius: 24px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            border: 1px solid white;
+        }
+
+        /* 标题区 */
+        header { text-align: center; margin-bottom: 24px; }
+        .brand-badge { background: var(--primary); color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 8px; display: inline-block; }
+
+        /* 表单控件 */
+        .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #4B5563; }
+        input, select {
+            width: 100%; padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 12px;
+            font-size: 15px; margin-bottom: 18px; transition: all 0.3s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        /* 租金面板 */
+        .price-panel {
+            background: #F0F7FF; border: 1px solid #CFE2FF;
+            padding: 16px; border-radius: 16px; margin-bottom: 20px;
+        }
+        .price-row { display: flex; justify-content: space-between; align-items: center; }
+        .total-amount { font-size: 24px; font-weight: 800; color: var(--primary); transition: all 0.3s; }
+
+        .submit-btn {
+            width: 100%; background: var(--primary); color: white; padding: 16px;
+            border: none; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* 成功页 */
+        #success-page { display: none; text-align: center; }
+        .order-id { font-family: monospace; font-size: 32px; color: var(--primary-dark); margin: 15px 0; background: #F1F5F9; padding: 10px; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="brand-badge">算力租享</div>
+            <h1>期末计算器预约</h1>
+        </header>
+
+        <div class="card" id="form-card">
+            <form id="booking-form">
+                <label class="form-label">计算器型号</label>
+                <select id="model" required>
+                    <option value="">点击选择...</option>
+                    <option value="标准科学计算器">标准科学计算器 CASIO-991</option>
+                    <!-- <option value="财务计算器(适合CPA/CFA)">财务计算器</option> -->
+                </select>
+
+                <label class="form-label">租赁天数 (1-7天)</label>
+                <input type="number" id="days" value="1" min="1" max="7" required>
+
+                <div class="price-panel">
+                    <div class="price-row">
+                        <div>
+                            <p style="font-size: 12px; color: var(--text-muted);">平均单价</p>
+                            <span style="font-size: 14px; font-weight: 600;">￥<span id="unit-price">0</span></span>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 12px; color: var(--text-muted);">合计租金</p>
+                            <span class="total-amount">￥<span id="total-price">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <label class="form-label">领取日期</label>
+                <input type="date" id="date" required>
+                <label class="form-label">手机号</label>
+                <input type="tel" id="phone" placeholder="11位手机号" required>
+                <label class="form-label">姓名</label>
+                <input type="text" id="name" placeholder="填写真实姓名" required>
+
+                <button type="submit" class="submit-btn" id="submit-text">确认提交预约</button>
+            </form>
+        </div>
+
+        <div class="card" id="success-page">
+            <h2 style="color: var(--success);">预约成功！</h2>
+            <div class="order-id" id="res-order">------</div>
+            <div style="text-align: left; font-size: 14px; line-height: 2;">
+                <p>📋 型号：<span id="res-model"></span></p>
+                <p>💰 合计：￥<span id="res-total"></span></p>
+                <p>📅 日期：<span id="res-date"></span></p>
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: var(--text-muted); background: #fffbeb; padding: 10px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                提示：请截图保存此页面，领取时出示给工作人员。
+            </div>
+            <button class="submit-btn" style="background:#94A3B8; margin-top:20px;" onclick="location.reload()">返回修改</button>
+        </div>
+    </div>
+
+    <script>
+        const modelSelect = document.getElementById('model');
+        const daysInput = document.getElementById('days');
+        const unitPriceLabel = document.getElementById('unit-price');
+        const totalPriceLabel = document.getElementById('total-price');
+
+        // 计算逻辑
+        function calculatePrice() {
+            const model = modelSelect.value;
+            const days = parseInt(daysInput.value) || 0;
+            let total = 0;
+            let unitPrice = "0";
+
+            if (model === '标准科学计算器') {
+                if (days === 1) { total = 1; unitPrice = "1 (首日特惠)"; }
+                else if (days === 7) { total = 9.9; unitPrice = "1.41 (周租优惠)"; }
+                else { total = 2 * days; unitPrice = "2"; }
+            } else if (model.includes('财务')) {
+                if (days === 7) { total = 29.9; unitPrice = "4.27 (周租优惠)"; }
+                else { total = 5 * days; unitPrice = "5"; }
+            }
+
+            unitPriceLabel.innerText = unitPrice;
+            totalPriceLabel.innerText = total.toFixed(1);
+
+            if (total > 0) {
+                totalPriceLabel.style.color = "#EF4444";
+                totalPriceLabel.parentElement.style.transform = "scale(1.05)";
+            } else {
+                totalPriceLabel.style.color = "var(--primary)";
+                totalPriceLabel.parentElement.style.transform = "scale(1)";
+            }
+        }
+
+        modelSelect.addEventListener('change', calculatePrice);
+        daysInput.addEventListener('input', calculatePrice);
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+        // 表单提交与飞书通知
+        document.getElementById('booking-form').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            // 提交按钮动画反馈
+            const btn = document.getElementById('submit-text');
+            btn.innerText = "提交中...";
+            btn.disabled = true;
+
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const model = modelSelect.value;
+            const days = daysInput.value;
+            const date = document.getElementById('date').value;
+            const total = totalPriceLabel.innerText;
+            const orderCode = Math.random().toString(36).toUpperCase().substring(2, 8);
+
+            // 飞书 Webhook 逻辑
+            const webhookUrl = 'https://open.feishu.cn/open-apis/bot/v2/hook/0ebe87d6-2124-4ff3-afc6-a095d581e975'; 
+
+            const feishuPayload = {
+                "msg_type": "text",
+                "content": {
+                    "text": `算力租享 - 🚀 新预约提醒\n----------------\n👤 姓名：${name}\n📱 电话：${phone}\n💻 型号：${model}\n📅 日期：${date}\n⏳ 时长：${days}天\n💰 总计：￥${total}\n🆔 订单号：${orderCode}\n----------------\n核对信息后请及时联系同学！`
+                }
+            };
+
+            try {
+                // 发送异步请求
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(feishuPayload)
+                });
+            } catch (error) {
+                console.error('Notification error:', error);
+            }
+
+            // 更新展示页面
+            document.getElementById('res-order').innerText = orderCode;
+            document.getElementById('res-model').innerText = model;
+            document.getElementById('res-total').innerText = total;
+            document.getElementById('res-date').innerText = date;
+
+            document.getElementById('form-card').style.display = 'none';
+            document.getElementById('success-page').style.display = 'block';
+            window.scrollTo(0, 0);
+        };
+    </script>
+</body>
+</html>
